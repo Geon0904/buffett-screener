@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "api/analyze.py", "use": "@vercel/python" },
+    { "src": "index.html", "use": "@vercel/static" },
+    { "src": "sp500.json", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/api/analyze", "dest": "/api/analyze.py" },
+    { "src": "/sp500.json", "dest": "/sp500.json" },
+    { "src": "/", "dest": "/index.html" }
+  ]
+}
