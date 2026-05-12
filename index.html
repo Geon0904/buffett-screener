@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Buffett Screener </title>
+<title>The Buffett &amp; Screener</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -108,6 +108,74 @@
   .lede {
     font-family: 'Cormorant Garamond', serif; font-size: 20px; line-height: 1.55;
     color: var(--ink-2); max-width: 680px; margin-bottom: 32px;
+  }
+
+  /* BUFFETT INDICATOR PANEL (top of diagnostic) */
+  .indicator-panel {
+    border: 1px solid var(--ink); background: var(--paper);
+    display: grid; grid-template-columns: 1fr 2fr; gap: 0;
+    margin-bottom: 36px;
+  }
+  .indicator-left {
+    padding: 24px 28px; border-right: 1px solid var(--ink);
+    background: var(--paper-2);
+  }
+  .indicator-right { padding: 24px 28px; }
+  .indicator-eyebrow {
+    font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase;
+    color: var(--ink-3); margin-bottom: 6px;
+  }
+  .indicator-value {
+    font-family: 'Cormorant Garamond', serif; font-size: 56px; font-weight: 600;
+    line-height: 1; color: var(--accent); margin-bottom: 4px;
+  }
+  .indicator-value .pct { font-size: 28px; }
+  .indicator-status {
+    display: inline-block; font-size: 11px; letter-spacing: 0.18em;
+    text-transform: uppercase; font-weight: 600;
+    padding: 4px 10px; border: 1px solid currentColor;
+    color: var(--accent); margin-top: 8px;
+  }
+  .indicator-bar-wrap {
+    margin-top: 12px;
+  }
+  .indicator-bar {
+    position: relative; height: 8px; background: var(--paper-2);
+    border: 0.5px solid var(--rule); overflow: visible;
+  }
+  .indicator-fill {
+    position: absolute; inset: 0;
+    background: linear-gradient(to right,
+      var(--green) 0%, var(--green) 30%,
+      var(--gold) 50%,
+      var(--amber) 70%,
+      var(--accent) 100%);
+  }
+  .indicator-marker {
+    position: absolute; top: -4px; width: 2px; height: 16px; background: var(--ink);
+  }
+  .indicator-marker::after {
+    content: ''; position: absolute; top: -4px; left: -3px;
+    width: 8px; height: 8px; background: var(--ink); transform: rotate(45deg);
+  }
+  .indicator-scale {
+    display: flex; justify-content: space-between;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    color: var(--ink-3); margin-top: 6px;
+  }
+  .indicator-headline {
+    font-family: 'Cormorant Garamond', serif; font-size: 22px;
+    font-weight: 600; line-height: 1.25; margin-bottom: 8px;
+  }
+  .indicator-body {
+    font-size: 13.5px; color: var(--ink-2); line-height: 1.6;
+  }
+  .indicator-body em {
+    font-style: italic; color: var(--accent); font-weight: 500;
+  }
+  .indicator-meta {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    color: var(--ink-3); margin-top: 10px; letter-spacing: 0.05em;
   }
 
   /* CRITERIA */
@@ -230,8 +298,8 @@
   .verdict-pill.good { color: var(--green); }
   .verdict-pill.mid  { color: var(--amber); }
   .verdict-pill.bad  { color: var(--red); }
-  .verdict-narrative { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 17px; line-height: 1.55; color: var(--ink-2); }
-  .verdict-narrative::first-letter { font-size: 38px; font-weight: 600; float: left; line-height: 0.9; padding-right: 6px; color: var(--accent); }
+  .verdict-narrative { font-family: 'Cormorant Garamond', serif; font-style: italic; font-size: 16px; line-height: 1.6; color: var(--ink-2); }
+  .verdict-narrative::first-letter { font-size: 36px; font-weight: 600; float: left; line-height: 0.9; padding-right: 6px; color: var(--accent); }
 
   .charts-row { display: grid; grid-template-columns: 1.3fr 1fr; gap: 24px; margin-bottom: 28px; }
   .panel { background: var(--paper); border: 1px solid var(--ink); padding: 22px; }
@@ -268,6 +336,8 @@
   @media (max-width: 720px) {
     .container { padding: 0 20px; }
     .lang-toggle { top: 12px; right: 12px; }
+    .indicator-panel { grid-template-columns: 1fr; }
+    .indicator-left { border-right: none; border-bottom: 1px solid var(--ink); }
     .verdict-card { grid-template-columns: 1fr; }
     .verdict-left { border-right: none; border-bottom: 1px solid var(--ink); }
     .charts-row { grid-template-columns: 1fr; }
@@ -322,6 +392,29 @@
       <span class="section-label" style="color: var(--gold); border-bottom-color: var(--gold);" data-i18n="ch2-label"></span>
       <h2 class="section-title" data-i18n="ch2-title" data-html="1"></h2>
       <p class="lede" style="margin: 0 auto;" data-i18n="ch2-lede"></p>
+    </div>
+
+    <!-- ===== BUFFETT INDICATOR PANEL ===== -->
+    <div class="indicator-panel">
+      <div class="indicator-left">
+        <div class="indicator-eyebrow" data-i18n="indicator-eyebrow"></div>
+        <div class="indicator-value serif">232<span class="pct">%</span></div>
+        <div class="indicator-status" data-i18n="indicator-status"></div>
+        <div class="indicator-bar-wrap">
+          <div class="indicator-bar">
+            <div class="indicator-fill"></div>
+            <div class="indicator-marker" style="left: 92%;"></div>
+          </div>
+          <div class="indicator-scale">
+            <span>50%</span><span>100%</span><span>150%</span><span>200%</span><span>250%</span>
+          </div>
+        </div>
+      </div>
+      <div class="indicator-right">
+        <div class="indicator-headline serif" data-i18n="indicator-headline"></div>
+        <div class="indicator-body" data-i18n="indicator-body" data-html="1"></div>
+        <div class="indicator-meta" data-i18n="indicator-meta"></div>
+      </div>
     </div>
 
     <div class="search-wrap">
@@ -401,7 +494,7 @@
 <footer class="container">
   <div class="ornament serif">❦</div>
   <div data-i18n="footer-title"></div>
-  <div style="margin-top: 6px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.15em;">v1.0 · LIVE DATA</div>
+  <div style="margin-top: 6px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.15em;">v1.2 · LIVE DATA</div>
   <p class="disclaimer" data-i18n="disclaimer"></p>
 </footer>
 
@@ -410,7 +503,7 @@ const i18n = {
   ko: {
     vol: 'Vol. I · No. 1',
     'masthead-mid': '오마하 · 인내하는 투자자를 위하여',
-    'masthead-right': '가치투자 진단소',
+    'masthead-right': '',
     sub: '— 워런 버핏의 6대 기준으로 S&P 500을 평가합니다 —',
     rule: '데이터 · 원칙 · 인내',
     quote: '가격은 당신이 지불하는 것이고, 가치는 당신이 얻는 것이다.',
@@ -420,7 +513,12 @@ const i18n = {
     'cautions-title': '주의할 점 · Caveats',
     'ch2-label': '제 2장 · The Diagnostic',
     'ch2-title': 'S&P 500 종목 <em>진단</em>',
-    'ch2-lede': '관심 있는 S&P 500 종목을 검색하세요. 실시간 재무 데이터로 6대 기준을 자동 평가합니다.',
+    'ch2-lede': '먼저 시장 전체 상태를 확인하고, 관심 있는 종목을 검색하세요.',
+    'indicator-eyebrow': '버핏 지수 · 시장 과열도',
+    'indicator-status': '극단적 과열',
+    'indicator-headline': '지금 시장 전체가 역사적 고점 부근입니다.',
+    'indicator-body': '미국 시가총액을 GDP로 나눈 비율이 <em>약 232%</em>로, 닷컴 버블(146%)과 2008년 금융위기 직전(109%)보다 높습니다. 버핏 본인이 "100%를 넘으면 불장난"이라 말한 이 지표는, 개별 종목이 아무리 좋아도 시장 전체가 과열되면 안전하지 않다는 경고입니다. 종목 점수와 별개로 <em>지금이 매수 적기인지</em>는 본인이 판단하셔야 합니다.',
+    'indicator-meta': '데이터 출처 · Q1 2026 GDP / Wilshire 5000 · 2026-05 기준',
     'search-placeholder': '티커 또는 회사명 검색 (예: AAPL, Apple)',
     'popular-label': '인기',
     loading: '재무 데이터를 불러오는 중입니다...',
@@ -431,7 +529,7 @@ const i18n = {
     'radar-title': '6대 기준 적합도',
     'snapshot-title': '주요 지표',
     'detail-title': '기준별 상세 평가',
-    'footer-title': 'The Buffett & Screener · 가치투자 진단소',
+    'footer-title': 'The Buffett & Screener',
     disclaimer: '본 사이트는 실시간 재무 데이터를 기반으로 분석을 제공하지만, 투자 권유가 아닌 교육·참고용 도구입니다. 모든 투자 결정은 본인의 책임입니다.',
     verdictLabels: { good: '매수 검토', mid: '관망', bad: '회피' },
     radarLabels: ['ROE', '부채 건전성', 'EPS 성장', '현금 회전', '잉여금 효율', 'FCF 비율'],
@@ -446,22 +544,17 @@ const i18n = {
     cautions: [
       '<strong>섹터에 따라 기준이 다릅니다.</strong> 은행·보험주는 부채가 본업이므로 II번 기준이 의미가 없습니다.',
       '<strong>자사주 매입이 많은 기업은 ROE가 왜곡됩니다.</strong> 자기자본이 작아져 ROE가 비정상적으로 부풀려질 수 있습니다.',
-      '<strong>거시 환경을 무시하지 마세요.</strong> 시장 전체가 과열되면 좋은 종목도 안전하지 않습니다.',
+      '<strong>거시 환경을 무시하지 마세요.</strong> 시장 전체가 과열되면 좋은 종목도 안전하지 않습니다. 상단의 버핏 지수를 함께 참고하세요.',
       '<strong>정량 지표만으로는 부족합니다.</strong> 경제적 해자는 숫자가 아닌 정성적 판단의 영역입니다.',
       '<strong>최종 결정은 본인이 합니다.</strong> 이 사이트는 진단 도구일 뿐, 매수·매도 권유가 아닙니다.'
     ],
     criteriaShort: ['5년 평균 ROE > 15%', '장기부채 < 순이익 × 3', '5년 EPS 성장률 > 10%', '현금회전일수 < 120일', '잉여금 효율 비율', '매출 대비 FCF > 7%'],
-    snapshotLabels: { roe: '평균 ROE', debt: '부채/순이익', growth: 'EPS CAGR', ccc: '현금회전일수', retained: '잉여금 효율', fcf: 'FCF 마진' },
-    narrative: {
-      good: '6대 기준 대부분을 통과하는 우량한 기업입니다. 다만 단일 종목 매수 전 반드시 경제적 해자, 경영진 자질, 현재 밸류에이션을 별도로 검토하시기 바랍니다.',
-      mid: '일부 기준은 통과하지만 약한 부분이 있습니다. 약점이 일시적인지 구조적인지 추가 분석이 필요합니다.',
-      bad: '버핏의 정량 기준에서는 미달입니다. 다만 산업 특성상 기준 자체가 맞지 않을 수도 있으니 (예: 자본집약 산업) 맥락을 함께 보세요.'
-    }
+    snapshotLabels: { roe: '평균 ROE', debt: '부채/순이익', growth: 'EPS CAGR', ccc: '현금회전일수', retained: '잉여금 효율', fcf: 'FCF 마진' }
   },
   en: {
     vol: 'Vol. I · No. 1',
     'masthead-mid': 'Omaha · Established for the Patient Investor',
-    'masthead-right': "A Value Investor's Diagnostic",
+    'masthead-right': '',
     sub: "— Evaluating the S&P 500 by Warren Buffett's six criteria —",
     rule: 'Data · Principle · Patience',
     quote: 'Price is what you pay; value is what you get.',
@@ -471,7 +564,12 @@ const i18n = {
     'cautions-title': 'A Word of Caution',
     'ch2-label': 'Chapter II · The Diagnostic',
     'ch2-title': 'S&P 500 <em>Diagnosis</em>',
-    'ch2-lede': 'Search any S&P 500 ticker. Live financial data is fetched and evaluated against the six criteria instantly.',
+    'ch2-lede': "Check the broader market posture first, then search any ticker you're curious about.",
+    'indicator-eyebrow': 'Buffett Indicator · Market Temperature',
+    'indicator-status': 'Extreme Overvaluation',
+    'indicator-headline': 'The broader market sits at historic highs.',
+    'indicator-body': 'US market cap divided by GDP stands at <em>roughly 232%</em> — higher than at the dot-com peak (146%) or before the 2008 financial crisis (109%). Buffett himself called the indicator "playing with fire above 100%". Even an exceptional individual stock is not safe when the whole market is overheated. The score on a single name does not tell you <em>whether now is the right moment to buy</em> — that judgment is yours.',
+    'indicator-meta': 'Source · Q1 2026 GDP / Wilshire 5000 · May 2026',
     'search-placeholder': 'Search ticker or company (e.g. AAPL, Apple)',
     'popular-label': 'Popular',
     loading: 'Fetching financial data...',
@@ -482,7 +580,7 @@ const i18n = {
     'radar-title': 'Fit Across the Six',
     'snapshot-title': 'Key Metrics',
     'detail-title': 'Criterion-by-Criterion Review',
-    'footer-title': "The Buffett & Screener · A Value Investor's Diagnostic",
+    'footer-title': 'The Buffett & Screener',
     disclaimer: 'This site analyzes live financial data but is an educational tool, not investment advice. All decisions are your own responsibility.',
     verdictLabels: { good: 'Consider Buying', mid: 'Hold / Watch', bad: 'Avoid' },
     radarLabels: ['ROE', 'Debt Health', 'EPS Growth', 'Cash Cycle', 'Retained Earn.', 'FCF Margin'],
@@ -497,17 +595,12 @@ const i18n = {
     cautions: [
       '<strong>The criteria are sector-dependent.</strong> Banks and insurers carry debt as part of their model, so Criterion II is meaningless for them.',
       '<strong>Heavy buybacks distort ROE.</strong> Aggressive repurchases shrink the equity base and can inflate ROE artificially.',
-      '<strong>Watch the macro picture.</strong> Even a wonderful business is unsafe when the broader market is overheated.',
+      '<strong>Watch the macro picture.</strong> Even a wonderful business is unsafe when the broader market is overheated. Use the Buffett Indicator above alongside any single-stock verdict.',
       "<strong>Numbers alone aren't enough.</strong> Economic moats live outside the spreadsheet and require qualitative judgment.",
       '<strong>The final decision is yours.</strong> This is a diagnostic tool, not a buy/sell recommendation.'
     ],
     criteriaShort: ['5Y avg ROE > 15%', 'Long-term Debt < Net Income × 3', '5Y EPS CAGR > 10%', 'Cash Conversion Cycle < 120d', 'Retained Earnings Efficiency', 'FCF / Revenue > 7%'],
-    snapshotLabels: { roe: 'Avg ROE', debt: 'Debt/NI', growth: 'EPS CAGR', ccc: 'Cash Cycle', retained: 'Retained Eff.', fcf: 'FCF Margin' },
-    narrative: {
-      good: 'A high-quality business that clears most of the six tests. Still, before any single-stock purchase, evaluate the economic moat, management quality, and current valuation separately.',
-      mid: 'Passes some tests but is weak elsewhere. Worth deeper analysis to see if the weakness is temporary or structural.',
-      bad: "Falls short of Buffett's quantitative thresholds. That said, industry context matters — capital-intensive sectors often look bad on these criteria but may be sound investments."
-    }
+    snapshotLabels: { roe: 'Avg ROE', debt: 'Debt/NI', growth: 'EPS CAGR', ccc: 'Cash Cycle', retained: 'Retained Eff.', fcf: 'FCF Margin' }
   }
 };
 
@@ -516,7 +609,7 @@ let currentLang = 'ko';
 let radar;
 let sp500List = [];
 let activeIndex = -1;
-const cache = {};  // ticker -> result
+const cache = {};
 
 // ---------- I18N ----------
 function applyI18n() {
@@ -563,15 +656,12 @@ function searchTickers(query) {
   if (!query) return [];
   const q = query.toUpperCase().trim();
   const results = [];
-  // Exact ticker match first
   for (const item of sp500List) {
     if (item.t === q) results.push(item);
   }
-  // Then ticker startswith
   for (const item of sp500List) {
     if (item.t !== q && item.t.startsWith(q)) results.push(item);
   }
-  // Then name contains (case-insensitive)
   const qLower = query.toLowerCase().trim();
   for (const item of sp500List) {
     if (!item.t.startsWith(q) && item.n.toLowerCase().includes(qLower)) results.push(item);
@@ -608,7 +698,6 @@ async function analyzeTicker(ticker) {
   document.getElementById('result-section').classList.remove('show');
   document.getElementById('state-loading').style.display = 'block';
 
-  // Check cache
   if (cache[ticker]) {
     renderResult(cache[ticker]);
     return;
@@ -642,9 +731,13 @@ function renderResult(data) {
   const pill = document.getElementById('v-pill');
   pill.textContent = t.verdictLabels[cls];
   pill.className = 'verdict-pill ' + cls;
-  document.getElementById('v-narrative').textContent = t.narrative[cls];
 
-  // criterion detail rows
+  // Per-stock narrative from backend, with safe fallback
+  const narrText = (data.narratives && data.narratives[currentLang])
+    || (data.narratives && data.narratives.ko)
+    || '';
+  document.getElementById('v-narrative').textContent = narrText;
+
   const romans = ['I','II','III','IV','V','VI'];
   document.getElementById('crit-list').innerHTML = data.scores.map((s, i) => `
     <div class="crit-row">
@@ -656,7 +749,6 @@ function renderResult(data) {
       <div class="crit-row-score serif ${scoreClass(s)}">${s}</div>
     </div>`).join('');
 
-  // snapshot
   const r = data.raw, sl = t.snapshotLabels;
   document.getElementById('snapshot-list').innerHTML = `
     <div><dt style="color: var(--ink-3); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;">${sl.roe}</dt><dd class="mono" style="font-size: 18px; font-weight: 500; margin-top: 2px;">${r.roe}%</dd></div>
@@ -666,10 +758,8 @@ function renderResult(data) {
     <div><dt style="color: var(--ink-3); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;">${sl.retained}</dt><dd class="mono" style="font-size: 18px; font-weight: 500; margin-top: 2px;">${r.retainedEfficiency}</dd></div>
     <div><dt style="color: var(--ink-3); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;">${sl.fcf}</dt><dd class="mono" style="font-size: 18px; font-weight: 500; margin-top: 2px;">${r.fcfMargin}%</dd></div>`;
 
-  // radar
   if (radar) { radar.data.datasets[0].data = data.scores; radar.update(); }
 
-  // scroll into view
   document.getElementById('result-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
@@ -689,11 +779,15 @@ radar = new Chart(ctx, {
   options: {
     responsive: true, maintainAspectRatio: false,
     animation: { duration: 700, easing: 'easeOutQuart' },
-    plugins: { legend: { display: false }, tooltip: {
-      backgroundColor: '#1a1611', titleFont: { family: 'IBM Plex Sans KR' },
-      bodyFont: { family: 'JetBrains Mono', size: 12 }, padding: 10,
-      callbacks: { label: (c) => c.parsed.r + ' / 100' }
-    } },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#1a1611',
+        titleFont: { family: 'IBM Plex Sans KR' },
+        bodyFont: { family: 'JetBrains Mono', size: 12 }, padding: 10,
+        callbacks: { label: (c) => c.parsed.r + ' / 100' }
+      }
+    },
     scales: { r: {
       min: 0, max: 100,
       ticks: { stepSize: 25, font: { size: 10, family: 'JetBrains Mono' }, color: '#756851', backdropColor: 'transparent' },
@@ -765,7 +859,6 @@ document.querySelectorAll('.lang-toggle button').forEach(btn => {
       b.classList.toggle('active', b.dataset.lang === lang));
     try { localStorage.setItem('buffett-lang', lang); } catch (e) {}
     applyI18n();
-    // Re-render current result in new language
     const ticker = document.getElementById('v-ticker').textContent.split(':').pop().trim();
     if (cache[ticker]) renderResult(cache[ticker]);
   });
