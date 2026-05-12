@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Buffett Screener · 가치투자 진단소</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --paper: #f4ede0;
+    --paper-2: #ebe1cf;
+    --ink: #1a1611;
+    --ink-2: #4a3f30;
+    --ink-3: #756851;
+    --rule: #c9bca0;
+    --accent: #7a1f1f;
+    --gold: #8a6d2e;
+    --green: #3d5c3a;
+    --amber: #a06820;
+    --red: #7a1f1f;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans KR', sans-serif;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(122, 31, 31, 0.03) 0%, transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(138, 109, 46, 0.04) 0%, transparent 40%);
+    background-attachment: fixed;
+  }
+  .serif { font-family: 'Cormorant Garamond', serif; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  .container { max-width: 1080px; margin: 0 auto; padding: 0 32px; }
+
+  /* LANG TOGGLE */
+  .lang-toggle {
+    position: fixed;
+    top: 20px;
+    right: 24px;
+    z-index: 100;
+    display: flex;
+    background: var(--paper);
+    border: 1px solid var(--ink);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    box-shadow: 2px 2px 0 rgba(26, 22, 17, 0.15);
+  }
+  .lang-toggle button {
+    background: transparent;
+    border: none;
+    padding: 8px 14px;
+    cursor: pointer;
+    color: var(--ink-3);
+    font-family: inherit;
+    font-size: inherit;
+    letter-spacing: inherit;
+    transition: all 0.15s ease;
+  }
+  .lang-toggle button:hover { color: var(--ink); }
+  .lang-toggle button.active { background: var(--ink); color: var(--paper); }
+  .lang-toggle button + button { border-left: 1px solid var(--ink); }
+
+  /* MASTHEAD */
+  .masthead { border-bottom: 2px double var(--ink); padding: 24px 0 18px; }
+  .masthead-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    border-bottom: 0.5px solid var(--rule);
+    padding-bottom: 8px;
+    margin-bottom: 18px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .masthead h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 600;
+    font-size: clamp(54px, 8vw, 88px);
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    text-align: center;
+    font-style: italic;
+  }
+  .masthead h1 .ampersand { font-weight: 400; color: var(--accent); }
+  .masthead-sub {
+    text-align: center;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 18px;
+    font-style: italic;
+    color: var(--ink-2);
+    margin-top: 6px;
+    letter-spacing: 0.04em;
+  }
+  .masthead-rule {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
+    margin-top: 12px;
+    color: var(--ink-3);
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+  }
+  .masthead-rule::before, .masthead-rule::after {
+    content: '';
+    height: 1px;
+    background: var(--rule);
+    flex: 1;
+    max-width: 180px;
+  }
+
+  /* HERO QUOTE */
+  .hero-quote { text-align: center; padding: 56px 16px 48px; border-bottom: 0.5px solid var(--rule); }
+  .hero-quote blockquote {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(24px, 3.5vw, 34px);
+    font-style: italic;
+    line-height: 1.35;
+    color: var(--ink);
+    max-width: 720px;
+    margin: 0 auto 16px;
+    position: relative;
+  }
+  .hero-quote blockquote::before {
+    content: '\201C';
+    font-size: 88px;
+    color: var(--accent);
+    position: absolute;
+    top: -36px;
+    left: -8px;
+    font-family: 'Cormorant Garamond', serif;
+    line-height: 1;
+    opacity: 0.6;
+  }
+  .hero-quote cite { font-style: normal; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-3); }
+
+  section { padding: 56px 0; border-bottom: 0.5px solid var(--rule); }
+
+  .section-label {
+    display: inline-block;
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--accent);
+    margin-bottom: 20px;
+  }
+  h2.section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-weight: 500;
+    font-size: clamp(34px, 4.5vw, 46px);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    margin-bottom: 16px;
+  }
+  h2.section-title em { color: var(--accent); font-weight: 600; }
+  .lede {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    line-height: 1.55;
+    color: var(--ink-2);
+    max-width: 680px;
+    margin-bottom: 32px;
+  }
+
+  /* CRITERIA */
+  .criteria-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    border-top: 1px solid var(--ink);
+    border-left: 1px solid var(--ink);
+    margin-top: 16px;
+  }
+  .criterion {
+    padding: 24px 22px;
+    border-right: 1px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+    background: var(--paper);
+  }
+  .criterion-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 52px;
+    font-style: italic;
+    line-height: 1;
+    color: var(--accent);
+    opacity: 0.85;
+    margin-bottom: 8px;
+  }
+  .criterion-title { font-weight: 600; font-size: 15px; margin-bottom: 6px; }
+  .criterion-formula {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-3);
+    background: var(--paper-2);
+    padding: 6px 8px;
+    border-radius: 2px;
+    margin-bottom: 10px;
+    display: inline-block;
+  }
+  .criterion-desc { font-size: 13px; color: var(--ink-2); line-height: 1.55; }
+
+  /* CAUTIONS */
+  .cautions {
+    background: var(--paper-2);
+    padding: 36px 32px;
+    margin-top: 28px;
+    border-left: 4px solid var(--accent);
+  }
+  .cautions h3 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 28px;
+    font-weight: 600;
+    font-style: italic;
+    margin-bottom: 16px;
+    color: var(--accent);
+  }
+  .cautions ol { list-style: none; counter-reset: caut; }
+  .cautions li {
+    counter-increment: caut;
+    padding: 12px 0 12px 44px;
+    position: relative;
+    border-bottom: 0.5px dashed var(--rule);
+    font-size: 14.5px;
+    line-height: 1.6;
+  }
+  .cautions li:last-child { border-bottom: none; }
+  .cautions li::before {
+    content: counter(caut, upper-roman) ".";
+    position: absolute;
+    left: 0;
+    top: 12px;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--accent);
+    font-style: italic;
+    width: 36px;
+  }
+  .cautions strong { color: var(--ink); font-weight: 600; }
+
+  /* SCREENER */
+  .screener-intro { text-align: center; margin-bottom: 32px; }
+  .screener-intro .section-label { color: var(--gold); border-bottom-color: var(--gold); }
+  .ticker-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 32px; }
+  .ticker-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    background: transparent;
+    border: 1px solid var(--ink);
+    color: var(--ink);
+    padding: 10px 18px;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    transition: all 0.15s ease;
+  }
+  .ticker-btn:hover { background: var(--ink); color: var(--paper); }
+  .ticker-btn.active { background: var(--accent); border-color: var(--accent); color: var(--paper); }
+  .ticker-btn .co {
+    font-family: 'IBM Plex Sans KR', sans-serif;
+    font-weight: 300;
+    font-size: 11px;
+    margin-left: 6px;
+    opacity: 0.7;
+  }
+
+  .verdict-card {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    border: 1px solid var(--ink);
+    background: var(--paper);
+    margin-bottom: 28px;
+  }
+  .verdict-left { padding: 28px 32px; border-right: 1px solid var(--ink); }
+  .verdict-right { padding: 28px 32px; background: var(--paper-2); }
+  .verdict-stamp { font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px; }
+  .verdict-ticker { font-family: 'JetBrains Mono', monospace; font-size: 14px; color: var(--ink-3); margin-bottom: 2px; }
+  .verdict-company {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 30px;
+    font-weight: 600;
+    line-height: 1.1;
+    margin-bottom: 18px;
+  }
+  .score-line { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; }
+  .score-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 68px;
+    font-weight: 600;
+    line-height: 0.9;
+  }
+  .score-denom { font-family: 'Cormorant Garamond', serif; font-size: 22px; font-style: italic; color: var(--ink-3); }
+  .verdict-pill {
+    display: inline-block;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 600;
+    padding: 6px 14px;
+    border: 1px solid currentColor;
+  }
+  .verdict-pill.good { color: var(--green); }
+  .verdict-pill.mid  { color: var(--amber); }
+  .verdict-pill.bad  { color: var(--red); }
+  .verdict-narrative {
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+    font-size: 17px;
+    line-height: 1.55;
+    color: var(--ink-2);
+  }
+  .verdict-narrative::first-letter {
+    font-size: 38px;
+    font-weight: 600;
+    float: left;
+    line-height: 0.9;
+    padding-right: 6px;
+    color: var(--accent);
+  }
+
+  /* CHARTS */
+  .charts-row { display: grid; grid-template-columns: 1.3fr 1fr; gap: 24px; margin-bottom: 28px; }
+  .panel { background: var(--paper); border: 1px solid var(--ink); padding: 22px; }
+  .panel-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-bottom: 0.5px solid var(--rule);
+    padding-bottom: 10px;
+    margin-bottom: 16px;
+  }
+  .panel-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 600; }
+  .panel-meta { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-3); }
+  .radar-wrap { position: relative; height: 340px; }
+
+  .indicator-value {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 52px;
+    font-weight: 600;
+    line-height: 1;
+    color: var(--accent);
+  }
+  .indicator-label { font-size: 12px; color: var(--ink-3); margin-bottom: 18px; }
+  .indicator-bar {
+    position: relative;
+    height: 10px;
+    background: var(--paper-2);
+    border: 0.5px solid var(--rule);
+    margin-bottom: 6px;
+  }
+  .indicator-fill {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right, var(--green) 0%, var(--green) 35%, var(--gold) 50%, var(--amber) 70%, var(--accent) 100%);
+  }
+  .indicator-marker {
+    position: absolute;
+    top: -4px;
+    width: 2px;
+    height: 18px;
+    background: var(--ink);
+  }
+  .indicator-marker::after {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -3px;
+    width: 8px;
+    height: 8px;
+    background: var(--ink);
+    transform: rotate(45deg);
+  }
+  .indicator-scale {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-3);
+    margin-top: 6px;
+  }
+  .indicator-note {
+    font-size: 12.5px;
+    color: var(--ink-2);
+    margin-top: 16px;
+    font-style: italic;
+    font-family: 'Cormorant Garamond', serif;
+    line-height: 1.5;
+  }
+
+  /* DETAIL LIST */
+  .crit-detail-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-top: 0.5px solid var(--rule);
+    border-left: 0.5px solid var(--rule);
+  }
+  .crit-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
+    border-right: 0.5px solid var(--rule);
+    border-bottom: 0.5px solid var(--rule);
+    background: var(--paper);
+  }
+  .crit-row-num {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 26px;
+    font-style: italic;
+    color: var(--ink-3);
+    width: 24px;
+  }
+  .crit-row-body { flex: 1; min-width: 0; }
+  .crit-row-name { font-size: 13px; font-weight: 500; margin-bottom: 2px; }
+  .crit-row-value { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--ink-3); }
+  .crit-row-score {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 22px;
+    font-weight: 600;
+    min-width: 48px;
+    text-align: right;
+  }
+  .crit-row-score.good { color: var(--green); }
+  .crit-row-score.mid  { color: var(--amber); }
+  .crit-row-score.bad  { color: var(--red); }
+
+  /* FOOTER */
+  footer { padding: 48px 0 64px; text-align: center; color: var(--ink-3); font-size: 12px; letter-spacing: 0.05em; }
+  footer .ornament { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: var(--accent); margin-bottom: 12px; }
+  footer .disclaimer {
+    font-style: italic;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 14px;
+    max-width: 540px;
+    margin: 12px auto 0;
+    line-height: 1.55;
+  }
+
+  @media (max-width: 720px) {
+    .container { padding: 0 20px; }
+    .lang-toggle { top: 12px; right: 12px; }
+    .verdict-card { grid-template-columns: 1fr; }
+    .verdict-left { border-right: none; border-bottom: 1px solid var(--ink); }
+    .charts-row { grid-template-columns: 1fr; }
+    .crit-detail-list { grid-template-columns: 1fr; }
+    section { padding: 40px 0; }
+    .hero-quote { padding: 36px 12px; }
+    .masthead-top { font-size: 9px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="lang-toggle" role="group" aria-label="Language">
+  <button data-lang="ko" class="active">KO</button>
+  <button data-lang="en">EN</button>
+</div>
+
+<header class="container masthead">
+  <div class="masthead-top">
+    <span data-i18n="vol"></span>
+    <span data-i18n="masthead-mid"></span>
+    <span data-i18n="masthead-right"></span>
+  </div>
+  <h1>The Buffett <span class="ampersand">&amp;</span> Screener</h1>
+  <div class="masthead-sub" data-i18n="sub"></div>
+  <div class="masthead-rule" data-i18n="rule"></div>
+</header>
+
+<section class="hero-quote" style="border-top: none;">
+  <div class="container">
+    <blockquote data-i18n="quote"></blockquote>
+    <cite>— Warren E. Buffett</cite>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <span class="section-label" data-i18n="ch1-label"></span>
+    <h2 class="section-title" data-i18n="ch1-title" data-html="1"></h2>
+    <p class="lede" data-i18n="ch1-lede" data-html="1"></p>
+    <div class="criteria-grid" id="criteria-grid"></div>
+    <div class="cautions">
+      <h3 data-i18n="cautions-title"></h3>
+      <ol id="cautions-list"></ol>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <div class="screener-intro">
+      <span class="section-label" style="color: var(--gold); border-bottom-color: var(--gold);" data-i18n="ch2-label"></span>
+      <h2 class="section-title" data-i18n="ch2-title" data-html="1"></h2>
+      <p class="lede" style="margin: 0 auto;" data-i18n="ch2-lede"></p>
+    </div>
+
+    <div class="ticker-row">
+      <button class="ticker-btn active" data-ticker="AAPL">AAPL<span class="co">Apple</span></button>
+      <button class="ticker-btn" data-ticker="KO">KO<span class="co">Coca-Cola</span></button>
+      <button class="ticker-btn" data-ticker="MSFT">MSFT<span class="co">Microsoft</span></button>
+      <button class="ticker-btn" data-ticker="JNJ">JNJ<span class="co">Johnson &amp; Johnson</span></button>
+      <button class="ticker-btn" data-ticker="TSLA">TSLA<span class="co">Tesla</span></button>
+      <button class="ticker-btn" data-ticker="F">F<span class="co">Ford</span></button>
+      <button class="ticker-btn" data-ticker="NVDA">NVDA<span class="co">NVIDIA</span></button>
+    </div>
+
+    <div class="verdict-card">
+      <div class="verdict-left">
+        <div class="verdict-stamp" data-i18n="verdict-stamp"></div>
+        <div class="verdict-ticker mono" id="v-ticker"></div>
+        <div class="verdict-company serif" id="v-company"></div>
+        <div class="score-line">
+          <span class="score-num serif" id="v-score"></span>
+          <span class="score-denom">/ 100</span>
+        </div>
+        <span class="verdict-pill good" id="v-pill"></span>
+      </div>
+      <div class="verdict-right">
+        <div class="verdict-stamp" data-i18n="editor-stamp"></div>
+        <p class="verdict-narrative" id="v-narrative"></p>
+      </div>
+    </div>
+
+    <div class="charts-row">
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title serif" data-i18n="radar-title"></div>
+          <div class="panel-meta">Radar Chart</div>
+        </div>
+        <div class="radar-wrap">
+          <canvas id="radar" role="img" aria-label="Radar chart"></canvas>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head">
+          <div class="panel-title serif" data-i18n="indicator-title"></div>
+          <div class="panel-meta">Buffett Indicator</div>
+        </div>
+        <div class="indicator-value serif">208<span style="font-size:24px;">%</span></div>
+        <div class="indicator-label" data-i18n="indicator-label" data-html="1"></div>
+        <div class="indicator-bar">
+          <div class="indicator-fill"></div>
+          <div class="indicator-marker" style="left: 83%;"></div>
+        </div>
+        <div class="indicator-scale">
+          <span>50%</span><span>100%</span><span>150%</span><span>200%</span><span>250%</span>
+        </div>
+        <p class="indicator-note" data-i18n="indicator-note" data-html="1"></p>
+      </div>
+    </div>
+
+    <div class="panel" style="padding: 0;">
+      <div class="panel-head" style="padding: 16px 22px; margin-bottom: 0;">
+        <div class="panel-title serif" data-i18n="detail-title"></div>
+        <div class="panel-meta">Line-by-line</div>
+      </div>
+      <div class="crit-detail-list" id="crit-list"></div>
+    </div>
+  </div>
+</section>
+
+<footer class="container">
+  <div class="ornament serif">❦</div>
+  <div data-i18n="footer-title"></div>
+  <div style="margin-top: 6px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.15em;">v0.2 · STATIC DEMO BUILD</div>
+  <p class="disclaimer" data-i18n="disclaimer"></p>
+</footer>
+
+<script>
+const i18n = {
+  ko: {
+    vol: 'Vol. I · No. 1',
+    'masthead-mid': '오마하 · 인내하는 투자자를 위하여',
+    'masthead-right': '가치투자 진단소',
+    sub: '— 워런 버핏의 6대 기준으로 종목을 평가합니다 —',
+    rule: '데이터 · 원칙 · 인내',
+    quote: '가격은 당신이 지불하는 것이고, 가치는 당신이 얻는 것이다.',
+    'ch1-label': '제 1장 · The Six Pillars',
+    'ch1-title': '버핏의 <em>여섯 가지</em> 잣대',
+    'ch1-lede': '버핏은 단순한 PER이나 PBR을 보지 않습니다. 기업이 <em>주주의 자본을 얼마나 효율적으로 굴리는가</em>, <em>빚 없이 스스로 성장할 수 있는가</em>를 봅니다. 아래 여섯 가지는 그가 50년간 변함없이 적용해 온 정량 기준입니다.',
+    'cautions-title': '주의할 점 · Caveats',
+    'ch2-label': '제 2장 · The Diagnostic',
+    'ch2-title': '종목 <em>진단</em>',
+    'ch2-lede': '아래 종목 중 하나를 골라보세요. 6대 기준을 통과하는지 즉시 보여드립니다.',
+    'verdict-stamp': '— 최종 평가 —',
+    'editor-stamp': '— 편집자 노트 —',
+    'radar-title': '6대 기준 적합도',
+    'indicator-title': '시장 과열도',
+    'indicator-label': '미국 시가총액 / GDP — <span style="color:var(--accent); font-weight:500;">고평가 구간</span>',
+    'indicator-note': '버핏 본인이 "100%를 넘으면 불장난"이라 말한 지표입니다. 200%를 넘은 현 시점, 개별 종목 진단만큼이나 <em>시장 전체 자세</em>가 중요합니다.',
+    'detail-title': '기준별 상세 평가',
+    'footer-title': 'The Buffett & Screener · 가치투자 진단소',
+    disclaimer: '본 사이트의 모든 수치는 데모용 더미 데이터이며, 실제 투자 결정의 근거로 사용해서는 안 됩니다. 실시간 데이터 연동은 후속 버전에서 제공될 예정입니다.',
+    verdictLabels: { good: '매수 검토', mid: '관망', bad: '회피' },
+    radarLabels: ['ROE', '부채 건전성', 'EPS 성장', '현금 회전', '잉여금 효율', 'FCF 비율'],
+    criteria: [
+      { num: 'I.',   title: '자기자본이익률 (ROE)', formula: '5Y avg ROE > 15%',          desc: '주주가 맡긴 돈으로 매년 15% 이상을 벌어내는 기업. 한 해가 아니라 <strong>5년 평균</strong>이어야 진짜입니다.' },
+      { num: 'II.',  title: '부채 건전성',           formula: '장기부채 < 순이익 × 3',     desc: '3년치 이익으로 모든 장기부채를 갚을 수 있어야 합니다. 빚이 많으면 불황에 살아남지 못합니다.' },
+      { num: 'III.', title: '이익 성장성',           formula: '5Y EPS CAGR > 10%',         desc: '주당순이익이 5년간 연평균 10% 이상 성장해 온 기업. 일관된 성장이 일시적 폭발보다 중요합니다.' },
+      { num: 'IV.',  title: '현금회전일수',          formula: 'CCC < 120 days',            desc: '재고를 팔고 현금으로 회수하는 데 걸리는 시간. 짧을수록 운전자본 부담이 적고 위기에 강합니다.' },
+      { num: 'V.',   title: '잉여금 효율',           formula: '잉여금증가 × 0.5 < 당좌자산증가', desc: '번 돈을 쌓아두기만 하지 않고, <strong>실제 현성 자산으로 전환</strong>되고 있는지를 봅니다.' },
+      { num: 'VI.',  title: '잉여현금흐름 비율',     formula: 'FCF / Revenue > 7%',        desc: '매출 100원 중 최소 7원은 <strong>진짜 쓸 수 있는 현금</strong>으로 남아야 합니다. 회계장부가 아닌 현금이 중요합니다.' }
+    ],
+    cautions: [
+      '<strong>섹터에 따라 기준이 다릅니다.</strong> 은행·보험주는 부채가 본업이므로 II번 기준이 의미가 없습니다. 일반 제조·소비재 기업에 적용하세요.',
+      '<strong>자사주 매입이 많은 기업은 ROE가 왜곡됩니다.</strong> 자기자본이 작아져 ROE가 비정상적으로 부풀려질 수 있습니다 (예: Apple, McDonald\'s).',
+      '<strong>거시 환경을 무시하지 마세요.</strong> 아무리 좋은 종목도 시장 전체가 과열되면 안전하지 않습니다. <em>버핏 지수(Market Cap / GDP)</em>를 함께 참고하세요.',
+      '<strong>정량 지표만으로는 부족합니다.</strong> 경제적 해자(brand, network effect, switching cost)는 숫자가 아닌 정성적 판단의 영역입니다.',
+      '<strong>최종 결정은 본인이 합니다.</strong> 이 사이트는 진단 도구일 뿐, 매수·매도 권유가 아닙니다.'
+    ],
+    criteriaShort: [
+      '5년 평균 ROE > 15%',
+      '장기부채 < 순이익 × 3',
+      '5년 EPS 성장률 > 10%',
+      '현금회전일수 < 120일',
+      '잉여금 효율 비율',
+      '매출 대비 FCF > 7%'
+    ],
+    tickerData: {
+      AAPL: { raw: ['ROE 28.4%', '4.2× (기준 3× 초과)', '12.1% CAGR', 'CCC 78일', '비율 0.71', 'FCF 23.5%'],
+              narrative: '버핏이 실제로 보유한 종목답게 6대 기준 중 5개를 통과합니다. 다만 자사주 매입으로 자기자본이 줄어 ROE가 과대평가된 측면이 있습니다.' },
+      KO:   { raw: ['ROE 38.2%', '5.1× (다소 부담)', '6.8% CAGR', 'CCC 92일', '비율 0.65', 'FCF 18.2%'],
+              narrative: '버핏의 영원한 사랑. ROE와 현금흐름은 압도적이지만, 성장률이 다소 느려 III번 기준에서 아쉬움을 남깁니다.' },
+      MSFT: { raw: ['ROE 35.1%', '1.8× (양호)', '17.3% CAGR', 'CCC 95일', '비율 0.92', 'FCF 28.1%'],
+              narrative: '6대 기준 전반이 모범 답안에 가깝습니다. 클라우드 전환 이후 잉여현금흐름이 폭발적으로 늘어 가치투자자에게도 매력적입니다.' },
+      JNJ:  { raw: ['ROE 24.6%', '2.4× (양호)', '5.2% CAGR', 'CCC 108일', '비율 0.58', 'FCF 19.8%'],
+              narrative: '안정성은 교과서적입니다. 다만 성장률이 한 자리수에 머물러 매수보다는 배당주 포트폴리오 관점에서 접근하는 편이 어울립니다.' },
+      TSLA: { raw: ['ROE 18.7%', '2.9× (경계)', '32.4% CAGR', 'CCC 142일 (초과)', '비율 0.42', 'FCF 4.8% (미달)'],
+              narrative: '성장률은 폭발적이지만 현금회전과 잉여현금흐름이 버핏 기준에 못 미칩니다. 버핏 본인도 "이해할 수 없는 기업은 사지 않는다"고 했습니다.' },
+      F:    { raw: ['ROE 9.2% (미달)', '12.8× (위험)', '3.1% CAGR (미달)', 'CCC 168일', '비율 0.38', 'FCF 8.2%'],
+              narrative: '전형적인 자본집약적 산업의 함정. 부채 부담이 크고 ROE도 한 자리수입니다. 버핏이 항공·자동차주를 꺼리는 이유가 보입니다.' },
+      NVDA: { raw: ['ROE 55.8%', '1.2× (우수)', '48.7% CAGR', 'CCC 118일', '비율 0.88', 'FCF 32.5%'],
+              narrative: '숫자만 보면 완벽에 가깝습니다. 다만 사이클 정점일 가능성과 PER 부담이 큰 점, 그리고 III번 성장률이 지속가능한가는 별개의 질문입니다.' }
+    }
+  },
+  en: {
+    vol: 'Vol. I · No. 1',
+    'masthead-mid': 'Omaha · Established for the Patient Investor',
+    'masthead-right': 'A Value Investor\'s Diagnostic',
+    sub: '— Evaluating equities by Warren Buffett\'s six criteria —',
+    rule: 'Data · Principle · Patience',
+    quote: 'Price is what you pay; value is what you get.',
+    'ch1-label': 'Chapter I · The Six Pillars',
+    'ch1-title': 'Buffett\'s <em>Six</em> Yardsticks',
+    'ch1-lede': 'Buffett does not lean on a simple P/E or P/B. He asks whether a business <em>compounds shareholders\' capital efficiently</em> and whether it can <em>grow without leaning on debt</em>. The six criteria below are the quantitative tests he has applied, with little variation, for half a century.',
+    'cautions-title': 'A Word of Caution',
+    'ch2-label': 'Chapter II · The Diagnostic',
+    'ch2-title': 'Equity <em>Diagnosis</em>',
+    'ch2-lede': 'Select a ticker below. We\'ll show you immediately whether it clears the six criteria.',
+    'verdict-stamp': '— Official Verdict —',
+    'editor-stamp': '— Editor\'s Note —',
+    'radar-title': 'Fit Across the Six',
+    'indicator-title': 'Market Temperature',
+    'indicator-label': 'US Market Cap / GDP — <span style="color:var(--accent); font-weight:500;">Overvalued territory</span>',
+    'indicator-note': 'Buffett himself once called this "playing with fire above 100%". With the reading now past 200%, the posture of the broader market matters as much as any single name.',
+    'detail-title': 'Criterion-by-Criterion Review',
+    'footer-title': 'The Buffett & Screener · A Value Investor\'s Diagnostic',
+    disclaimer: 'All figures on this site are placeholder data for demonstration purposes only and must not be used as a basis for investment decisions. Live data integration is planned for a future release.',
+    verdictLabels: { good: 'Consider Buying', mid: 'Hold / Watch', bad: 'Avoid' },
+    radarLabels: ['ROE', 'Debt Health', 'EPS Growth', 'Cash Cycle', 'Retained Earn.', 'FCF Margin'],
+    criteria: [
+      { num: 'I.',   title: 'Return on Equity (ROE)',  formula: '5Y avg ROE > 15%',                 desc: 'A business that earns more than 15% on shareholder capital — not for one year, but as a <strong>five-year average</strong>.' },
+      { num: 'II.',  title: 'Debt Health',             formula: 'Long-term Debt < Net Income × 3',  desc: 'The company should be able to repay all long-term debt with three years of earnings. Heavy leverage rarely survives a recession.' },
+      { num: 'III.', title: 'Earnings Growth',         formula: '5Y EPS CAGR > 10%',                desc: 'EPS compounding at 10% or more per year over five years. Consistent growth matters more than a single explosive quarter.' },
+      { num: 'IV.',  title: 'Cash Conversion Cycle',   formula: 'CCC < 120 days',                   desc: 'Days needed to turn inventory back into cash. Shorter cycles mean less working-capital strain and greater resilience.' },
+      { num: 'V.',   title: 'Retained Earnings Efficiency', formula: 'ΔRetained × 0.5 < ΔQuick Assets', desc: 'Earnings should not just pile up on the balance sheet — they should <strong>convert into liquid assets</strong>.' },
+      { num: 'VI.',  title: 'Free Cash Flow Margin',   formula: 'FCF / Revenue > 7%',               desc: 'At least 7¢ of every revenue dollar should land as <strong>real, spendable cash</strong>. Accounting profit isn\'t enough.' }
+    ],
+    cautions: [
+      '<strong>The criteria are sector-dependent.</strong> Banks and insurers carry debt as part of their business model, so Criterion II is meaningless for them. Apply these tests to standard manufacturing or consumer businesses.',
+      '<strong>Heavy buybacks distort ROE.</strong> Aggressive share repurchases shrink the equity base, which can inflate ROE artificially (Apple and McDonald\'s are textbook cases).',
+      '<strong>Don\'t ignore the macro picture.</strong> Even a wonderful business is unsafe when the broader market is overheated. Watch the <em>Buffett Indicator (Market Cap / GDP)</em> alongside any single-stock verdict.',
+      '<strong>Numbers alone aren\'t enough.</strong> Economic moats — brand, network effect, switching costs — live outside the spreadsheet and require qualitative judgment.',
+      '<strong>The final decision is yours.</strong> This site is a diagnostic tool, not a recommendation to buy or sell.'
+    ],
+    criteriaShort: [
+      '5Y avg ROE > 15%',
+      'Long-term Debt < Net Income × 3',
+      '5Y EPS CAGR > 10%',
+      'Cash Conversion Cycle < 120d',
+      'Retained Earnings Efficiency',
+      'FCF / Revenue > 7%'
+    ],
+    tickerData: {
+      AAPL: { raw: ['ROE 28.4%', '4.2× (above 3× limit)', '12.1% CAGR', 'CCC 78d', 'Ratio 0.71', 'FCF 23.5%'],
+              narrative: 'A Buffett portfolio holding, and it shows — clearing five of the six tests. The caveat: aggressive buybacks have shrunk the equity base, somewhat overstating the ROE figure.' },
+      KO:   { raw: ['ROE 38.2%', '5.1× (somewhat heavy)', '6.8% CAGR', 'CCC 92d', 'Ratio 0.65', 'FCF 18.2%'],
+              narrative: 'Buffett\'s lifelong favorite. ROE and cash generation are commanding, but earnings growth has been modest — leaving Criterion III as the weakest link.' },
+      MSFT: { raw: ['ROE 35.1%', '1.8× (healthy)', '17.3% CAGR', 'CCC 95d', 'Ratio 0.92', 'FCF 28.1%'],
+              narrative: 'Close to a textbook answer across all six tests. The shift to cloud has produced a free-cash-flow profile that even strict value investors find hard to ignore.' },
+      JNJ:  { raw: ['ROE 24.6%', '2.4× (healthy)', '5.2% CAGR', 'CCC 108d', 'Ratio 0.58', 'FCF 19.8%'],
+              narrative: 'The stability profile is textbook. But single-digit growth makes this more of a dividend-portfolio candidate than a buy-and-compound name.' },
+      TSLA: { raw: ['ROE 18.7%', '2.9× (borderline)', '32.4% CAGR', 'CCC 142d (over)', 'Ratio 0.42', 'FCF 4.8% (below)'],
+              narrative: 'Growth is explosive, but the cash cycle and free-cash-flow margin fall short of Buffett\'s thresholds. Buffett himself has said he avoids what he cannot understand.' },
+      F:    { raw: ['ROE 9.2% (below)', '12.8× (high risk)', '3.1% CAGR (below)', 'CCC 168d', 'Ratio 0.38', 'FCF 8.2%'],
+              narrative: 'The classic capital-intensive trap. Heavy debt, single-digit ROE — a clear illustration of why Buffett has historically avoided airlines and automakers.' },
+      NVDA: { raw: ['ROE 55.8%', '1.2× (excellent)', '48.7% CAGR', 'CCC 118d', 'Ratio 0.88', 'FCF 32.5%'],
+              narrative: 'On the numbers alone, near perfect. The harder questions: is this a cycle peak, is the valuation defensible, and can the growth in Criterion III be sustained?' }
+    }
+  }
+};
+
+const scoresMap = {
+  AAPL: [92, 70, 85, 88, 75, 90],
+  KO:   [88, 60, 65, 82, 70, 80],
+  MSFT: [85, 90, 95, 80, 88, 92],
+  JNJ:  [78, 82, 60, 75, 68, 72],
+  TSLA: [55, 65, 80, 40, 50, 30],
+  F:    [40, 25, 35, 30, 45, 55],
+  NVDA: [95, 88, 98, 70, 85, 80]
+};
+const companies = {
+  AAPL: { name: 'Apple Inc.',            exchange: 'NASDAQ' },
+  KO:   { name: 'The Coca-Cola Company', exchange: 'NYSE' },
+  MSFT: { name: 'Microsoft Corporation', exchange: 'NASDAQ' },
+  JNJ:  { name: 'Johnson & Johnson',     exchange: 'NYSE' },
+  TSLA: { name: 'Tesla, Inc.',           exchange: 'NASDAQ' },
+  F:    { name: 'Ford Motor Company',    exchange: 'NYSE' },
+  NVDA: { name: 'NVIDIA Corporation',    exchange: 'NASDAQ' }
+};
+
+let currentLang = 'ko';
+let currentTicker = 'AAPL';
+let radar;
+
+function scoreClass(s) { return s >= 70 ? 'good' : (s >= 50 ? 'mid' : 'bad'); }
+
+function applyI18n() {
+  const t = i18n[currentLang];
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (!(key in t)) return;
+    if (el.getAttribute('data-html') === '1') el.innerHTML = t[key];
+    else el.textContent = t[key];
+  });
+  document.documentElement.lang = currentLang;
+
+  const grid = document.getElementById('criteria-grid');
+  grid.innerHTML = t.criteria.map(c => `
+    <div class="criterion">
+      <div class="criterion-num">${c.num}</div>
+      <div class="criterion-title">${c.title}</div>
+      <div class="criterion-formula">${c.formula}</div>
+      <div class="criterion-desc">${c.desc}</div>
+    </div>
+  `).join('');
+
+  document.getElementById('cautions-list').innerHTML =
+    t.cautions.map(c => `<li>${c}</li>`).join('');
+
+  if (radar) {
+    radar.data.labels = t.radarLabels;
+    radar.update();
+  }
+  updateTicker(currentTicker);
+}
+
+function updateTicker(ticker) {
+  currentTicker = ticker;
+  const t = i18n[currentLang];
+  const co = companies[ticker];
+  const td = t.tickerData[ticker];
+  const sc = scoresMap[ticker];
+  const avg = Math.round(sc.reduce((a,b) => a+b, 0) / sc.length);
+
+  document.getElementById('v-ticker').textContent = co.exchange + ' : ' + ticker;
+  document.getElementById('v-company').textContent = co.name;
+  document.getElementById('v-score').textContent = avg;
+  document.getElementById('v-narrative').textContent = td.narrative;
+
+  const cls = scoreClass(avg);
+  const pill = document.getElementById('v-pill');
+  pill.textContent = t.verdictLabels[cls];
+  pill.className = 'verdict-pill ' + cls;
+
+  document.getElementById('crit-list').innerHTML = sc.map((s, i) => `
+    <div class="crit-row">
+      <div class="crit-row-num serif">${['I','II','III','IV','V','VI'][i]}.</div>
+      <div class="crit-row-body">
+        <div class="crit-row-name">${t.criteriaShort[i]}</div>
+        <div class="crit-row-value">${td.raw[i]}</div>
+      </div>
+      <div class="crit-row-score serif ${scoreClass(s)}">${s}</div>
+    </div>
+  `).join('');
+
+  if (radar) {
+    radar.data.datasets[0].data = sc;
+    radar.update();
+  }
+}
+
+// init chart
+const ctx = document.getElementById('radar').getContext('2d');
+radar = new Chart(ctx, {
+  type: 'radar',
+  data: {
+    labels: i18n.ko.radarLabels,
+    datasets: [{
+      data: scoresMap.AAPL,
+      backgroundColor: 'rgba(122, 31, 31, 0.18)',
+      borderColor: '#7a1f1f',
+      borderWidth: 2,
+      pointBackgroundColor: '#7a1f1f',
+      pointBorderColor: '#f4ede0',
+      pointBorderWidth: 1.5,
+      pointRadius: 4,
+      pointHoverRadius: 6
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: { duration: 700, easing: 'easeOutQuart' },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#1a1611',
+        titleFont: { family: 'IBM Plex Sans KR' },
+        bodyFont: { family: 'JetBrains Mono', size: 12 },
+        padding: 10,
+        callbacks: { label: (c) => c.parsed.r + ' / 100' }
+      }
+    },
+    scales: {
+      r: {
+        min: 0, max: 100,
+        ticks: { stepSize: 25, font: { size: 10, family: 'JetBrains Mono' }, color: '#756851', backdropColor: 'transparent' },
+        pointLabels: { font: { size: 12, family: 'IBM Plex Sans KR', weight: '500' }, color: '#1a1611' },
+        grid: { color: 'rgba(201, 188, 160, 0.6)' },
+        angleLines: { color: 'rgba(201, 188, 160, 0.8)' }
+      }
+    }
+  }
+});
+
+document.querySelectorAll('.ticker-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.ticker-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    updateTicker(btn.dataset.ticker);
+  });
+});
+
+document.querySelectorAll('.lang-toggle button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const lang = btn.dataset.lang;
+    if (lang === currentLang) return;
+    currentLang = lang;
+    document.querySelectorAll('.lang-toggle button').forEach(b =>
+      b.classList.toggle('active', b.dataset.lang === lang));
+    try { localStorage.setItem('buffett-lang', lang); } catch (e) {}
+    applyI18n();
+  });
+});
+
+// restore saved language
+try {
+  const saved = localStorage.getItem('buffett-lang');
+  if (saved === 'en' || saved === 'ko') {
+    currentLang = saved;
+    document.querySelectorAll('.lang-toggle button').forEach(b =>
+      b.classList.toggle('active', b.dataset.lang === saved));
+  }
+} catch (e) {}
+
+applyI18n();
+</script>
+
+</body>
+</html>
