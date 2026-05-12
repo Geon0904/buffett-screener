@@ -1,13 +1,11 @@
 """
-Buffett Screener - Vercel Serverless Function (v1.1)
-Receives a ticker, fetches financial data from Financial Modeling Prep,
-applies Warren Buffett's 6 criteria, and returns scores + raw values.
-
-v1.1 changes:
-- ROE now computed from netIncomePerShare / bookValuePerShare
-  (FMP's ratios endpoint no longer returns returnOnEquity directly).
-- Debt ratio uses balance-sheet longTermDebt + income netIncome,
-  with fallback to totalNonCurrentLiabilities when longTermDebt missing.
+Buffett Screener - Vercel Serverless Function (v1.2)
+v1.1 -> v1.2:
+- Generates rule-based per-stock narrative (Korean + English) so the
+  Editor's Note reflects the actual data instead of a generic message.
+- Marks suspicious patterns: artificially high ROE (buybacks),
+  negative CCC (supply-chain power), thin FCF margin (commodity / retail),
+  capital-intensive trap, etc.
 """
 
 import json
@@ -21,18 +19,16 @@ FMP_BASE = "https://financialmodelingprep.com/stable"
 API_KEY = os.environ.get("FMP_API_KEY", "")
 
 
-def fmp_get(endpoint: str, params: dict = None):
-    """Call an FMP endpoint and return the parsed JSON."""
+def fmp_get(endpoint, params=None):
     params = params or {}
     params["apikey"] = API_KEY
     url = f"{FMP_BASE}/{endpoint}?{urllib.parse.urlencode(params)}"
-    req = urllib.request.Request(url, headers={"User-Agent": "buffett-screener/1.1"})
+    req = urllib.request.Request(url, headers={"User-Agent": "buffett-screener/1.2"})
     with urllib.request.urlopen(req, timeout=15) as resp:
         return json.loads(resp.read().decode("utf-8"))
 
 
 def safe(value, default=0.0):
-    """Coerce to float, treating None/missing as default."""
     try:
         if value is None:
             return default
@@ -42,7 +38,6 @@ def safe(value, default=0.0):
 
 
 def score_linear(actual, target, *, higher_is_better=True):
-    """Map a metric to a 0-100 score."""
     if higher_is_better:
         if actual <= 0:
             return 0
@@ -55,8 +50,112 @@ def score_linear(actual, target, *, higher_is_better=True):
         return max(0, min(100, round((2 * target - actual) / target * 100)))
 
 
+# =====================================================================
+# Per-stock narrative generation
+# =====================================================================
+
+def generate_narratives(raw, scores, sector):
+    """
+    Build a contextual Editor's Note in Korean and English based on
+    the actual data pattern. Returns dict: {"ko": str, "en": str}.
+
+    Looks for distinctive patterns:
+    - ROE > 100%      : buyback distortion
+    - Negative CCC    : supply-chain power
+    - Negative retainedEfficiency : capital returned to shareholders
+    - FCF margin < 5% : low-margin retail / capital-intensive
+    - Banks / Insurance: debt criterion not meaningful
+    - High everything : exceptional quality
+    """
+    roe = raw["roe"]
+    debt = raw["debtRatio"]
+    growth = raw["epsCagr"]
+    ccc = raw["ccc"]
+    retained = raw["retainedEfficiency"]
+    fcf = raw["fcfMargin"]
+    avg = sum(scores) / 6
+
+    sector_lower = (sector or "").lower()
+    is_financial = any(s in sector_lower for s in ["bank", "insurance", "financial"])
+
+    ko_parts = []
+    en_parts = []
+
+    # --- 1) Overall posture ---
+    if avg >= 85:
+        ko_parts.append("6대 기준 대부분을 통과하는 보기 드문 우량주입니다.")
+        en_parts.append("A rare business that clears most of the six pillars.")
+    elif avg >= 70:
+        ko_parts.append("전반적으로 양호하나 일부 약한 지표가 있습니다.")
+        en_parts.append("Solid overall, with a few softer marks.")
+    elif avg >= 50:
+        ko_parts.append("기준에 부합하는 면과 미달하는 면이 공존합니다.")
+        en_parts.append("Mixed picture — passes some tests, fails others.")
+    else:
+        ko_parts.append("버핏의 정량 기준에서는 미달입니다.")
+        en_parts.append("Falls short of Buffett's quantitative thresholds.")
+
+    # --- 2) ROE distortion (buyback) ---
+    if roe > 80:
+        ko_parts.append(f"ROE {roe:.0f}%는 비정상적으로 높은 수치로, 공격적인 자사주 매입으로 자기자본이 축소된 영향이 큽니다. 본질적 수익성은 양호하지만 ROE 수치는 보정해서 봐야 합니다.")
+        en_parts.append(f"The {roe:.0f}% ROE is unusually high — aggressive buybacks have shrunk the equity base, inflating the figure. Underlying profitability is healthy, but treat the ROE number with caution.")
+    elif roe > 40:
+        ko_parts.append(f"ROE {roe:.0f}%는 압도적인 자본 효율성을 보여줍니다.")
+        en_parts.append(f"An ROE of {roe:.0f}% shows commanding capital efficiency.")
+
+    # --- 3) Negative CCC (supply-chain power) ---
+    if ccc < -30:
+        ko_parts.append(f"현금회전일수 {ccc:.0f}일은 공급망에서 압도적인 협상력을 가졌다는 신호입니다. 협력사가 먼저 돈을 받고 일하는 구조에 가깝습니다.")
+        en_parts.append(f"A cash cycle of {ccc:.0f} days signals dominant supply-chain power — the company collects cash before paying suppliers.")
+    elif ccc > 150:
+        ko_parts.append(f"현금회전일수 {ccc:.0f}일은 운전자본 부담이 크다는 뜻으로, 불황기에 취약할 수 있습니다.")
+        en_parts.append(f"A {ccc:.0f}-day cash cycle indicates heavy working-capital strain — vulnerable in downturns.")
+
+    # --- 4) Retained earnings efficiency anomalies ---
+    if retained < -0.1:
+        ko_parts.append("잉여금 효율이 음수인 것은 회사가 번 돈을 사내에 쌓아두기보다 배당·자사주 매입으로 주주에게 환원하고 있다는 의미입니다. 자체로는 나쁜 신호가 아닙니다.")
+        en_parts.append("Negative retained-earnings efficiency means the company is returning profits to shareholders via dividends and buybacks rather than hoarding them — not inherently a bad sign.")
+
+    # --- 5) FCF margin warning ---
+    if fcf < 5 and fcf > 0:
+        ko_parts.append(f"FCF 마진 {fcf:.1f}%는 낮은 편으로, 유통·자본집약 산업의 구조적 특징입니다. 운영 효율로 보완되는지 별도로 확인할 필요가 있습니다.")
+        en_parts.append(f"The {fcf:.1f}% FCF margin is thin — a structural feature of retail or capital-intensive industries. Worth checking whether operating efficiency compensates.")
+    elif fcf > 25:
+        ko_parts.append(f"FCF 마진 {fcf:.0f}%는 압도적인 현금 창출력을 보여줍니다.")
+        en_parts.append(f"An FCF margin of {fcf:.0f}% reflects exceptional cash generation.")
+
+    # --- 6) Debt warning ---
+    if debt > 5 and not is_financial:
+        ko_parts.append(f"장기부채가 순이익의 {debt:.1f}배로 부담스러운 수준입니다. 불황 견딜 여력에 의문을 가질 만합니다.")
+        en_parts.append(f"Long-term debt at {debt:.1f}x earnings is heavy and raises questions about downturn resilience.")
+    elif debt < 0.3 and not is_financial:
+        ko_parts.append("부채가 거의 없어 재무 안정성이 탁월합니다.")
+        en_parts.append("Near-debtless balance sheet — exceptional financial stability.")
+
+    # --- 7) Growth callout ---
+    if growth > 40:
+        ko_parts.append(f"EPS가 연 {growth:.0f}%씩 성장 중인데, 이 속도가 지속가능한지는 별개의 질문입니다.")
+        en_parts.append(f"EPS is compounding at {growth:.0f}% — whether that pace is sustainable is a separate question.")
+    elif growth < 5 and growth > 0:
+        ko_parts.append(f"EPS 성장률이 연 {growth:.1f}%로 정체에 가깝습니다. 성장보다 배당·안정성 관점에서 접근하는 편이 어울립니다.")
+        en_parts.append(f"EPS growth at {growth:.1f}% is near-flat — better suited to a dividend/stability lens than a growth one.")
+
+    # --- 8) Sector context ---
+    if is_financial:
+        ko_parts.append("은행/보험 섹터는 부채가 본업 구조이므로 II번 기준이 정량적 의미가 약합니다.")
+        en_parts.append("For banking and insurance, debt is structural to the business model — Criterion II is less meaningful here.")
+
+    # --- 9) Always close with humility ---
+    ko_parts.append("이 도구는 정량 진단이며, 실제 투자 결정 전 경제적 해자와 밸류에이션을 별도로 검토하시기 바랍니다.")
+    en_parts.append("This is a quantitative screen only; review the economic moat and current valuation separately before any decision.")
+
+    return {
+        "ko": " ".join(ko_parts),
+        "en": " ".join(en_parts),
+    }
+
+
 def analyze(ticker):
-    """Run the 6 Buffett criteria for a single ticker."""
     ticker = ticker.upper().strip()
 
     profile_data = fmp_get("profile", {"symbol": ticker})
@@ -73,8 +172,6 @@ def analyze(ticker):
         return {"error": f"Insufficient financial data for '{ticker}'."}
 
     # ===== Criterion I: 5Y avg ROE > 15% =====
-    # FMP no longer returns returnOnEquity. Compute it from per-share fields,
-    # then fall back to raw netIncome / equity if needed.
     roe_values = []
     for i in range(min(5, len(ratios))):
         npe = safe(ratios[i].get("netIncomePerShare"))
@@ -156,6 +253,17 @@ def analyze(ticker):
     scores = [score_roe, score_debt, score_growth, score_ccc, score_retained, score_fcf]
     avg_score = round(sum(scores) / 6)
 
+    raw = {
+        "roe": round(avg_roe, 1),
+        "debtRatio": round(debt_ratio, 2),
+        "epsCagr": round(eps_cagr, 1),
+        "ccc": round(ccc),
+        "retainedEfficiency": round(efficiency, 2),
+        "fcfMargin": round(avg_fcf_margin, 1),
+    }
+
+    narratives = generate_narratives(raw, scores, profile.get("industry", ""))
+
     return {
         "ticker": ticker,
         "company": profile.get("companyName", ticker),
@@ -164,14 +272,7 @@ def analyze(ticker):
         "industry": profile.get("industry"),
         "scores": scores,
         "averageScore": avg_score,
-        "raw": {
-            "roe": round(avg_roe, 1),
-            "debtRatio": round(debt_ratio, 2),
-            "epsCagr": round(eps_cagr, 1),
-            "ccc": round(ccc),
-            "retainedEfficiency": round(efficiency, 2),
-            "fcfMargin": round(avg_fcf_margin, 1),
-        },
+        "raw": raw,
         "rawLabels": [
             f"ROE {avg_roe:.1f}%",
             f"{debt_ratio:.1f}\u00d7",
@@ -180,6 +281,7 @@ def analyze(ticker):
             f"Ratio {efficiency:.2f}",
             f"FCF {avg_fcf_margin:.1f}%",
         ],
+        "narratives": narratives,
     }
 
 
