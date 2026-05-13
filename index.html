@@ -37,7 +37,6 @@
   .mono { font-family: 'JetBrains Mono', monospace; }
   .container { max-width: 1080px; margin: 0 auto; padding: 0 32px; }
 
-  /* LANG TOGGLE */
   .lang-toggle {
     position: fixed; top: 20px; right: 24px; z-index: 100;
     display: flex; background: var(--paper); border: 1px solid var(--ink);
@@ -53,7 +52,6 @@
   .lang-toggle button.active { background: var(--ink); color: var(--paper); }
   .lang-toggle button + button { border-left: 1px solid var(--ink); }
 
-  /* MASTHEAD */
   .masthead { border-bottom: 2px double var(--ink); padding: 24px 0 18px; }
   .masthead-top {
     display: flex; justify-content: space-between; align-items: center;
@@ -80,7 +78,6 @@
     content: ''; height: 1px; background: var(--rule); flex: 1; max-width: 180px;
   }
 
-  /* HERO */
   .hero-quote { text-align: center; padding: 56px 16px 48px; border-bottom: 0.5px solid var(--rule); }
   .hero-quote blockquote {
     font-family: 'Cormorant Garamond', serif; font-size: clamp(24px, 3.5vw, 34px);
@@ -110,7 +107,6 @@
     color: var(--ink-2); max-width: 680px; margin-bottom: 32px;
   }
 
-  /* BUFFETT INDICATOR PANEL (top of diagnostic) */
   .indicator-panel {
     border: 1px solid var(--ink); background: var(--paper);
     display: grid; grid-template-columns: 1fr 2fr; gap: 0;
@@ -136,9 +132,7 @@
     padding: 4px 10px; border: 1px solid currentColor;
     color: var(--accent); margin-top: 8px;
   }
-  .indicator-bar-wrap {
-    margin-top: 12px;
-  }
+  .indicator-bar-wrap { margin-top: 12px; }
   .indicator-bar {
     position: relative; height: 8px; background: var(--paper-2);
     border: 0.5px solid var(--rule); overflow: visible;
@@ -178,7 +172,6 @@
     color: var(--ink-3); margin-top: 10px; letter-spacing: 0.05em;
   }
 
-  /* CRITERIA */
   .criteria-grid {
     display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     border-top: 1px solid var(--ink); border-left: 1px solid var(--ink); margin-top: 16px;
@@ -194,7 +187,6 @@
   }
   .criterion-desc { font-size: 13px; color: var(--ink-2); line-height: 1.55; }
 
-  /* CAUTIONS */
   .cautions { background: var(--paper-2); padding: 36px 32px; margin-top: 28px; border-left: 4px solid var(--accent); }
   .cautions h3 { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 600; font-style: italic; margin-bottom: 16px; color: var(--accent); }
   .cautions ol { list-style: none; counter-reset: caut; }
@@ -210,7 +202,6 @@
   }
   .cautions strong { color: var(--ink); font-weight: 600; }
 
-  /* SEARCH BOX */
   .screener-intro { text-align: center; margin-bottom: 32px; }
   .screener-intro .section-label { color: var(--gold); border-bottom-color: var(--gold); }
 
@@ -257,7 +248,6 @@
   }
   .popular-btn:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
 
-  /* LOADING / EMPTY / ERROR STATES */
   .state-card {
     border: 1px dashed var(--rule); padding: 48px 32px; text-align: center;
     color: var(--ink-3); font-family: 'Cormorant Garamond', serif;
@@ -269,13 +259,51 @@
     animation: spin 0.8s linear infinite;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
+
   .error-card {
     border: 1px solid var(--accent); background: rgba(122, 31, 31, 0.05);
     padding: 24px 28px; color: var(--accent); font-size: 14px; line-height: 1.55;
   }
   .error-card strong { display: block; margin-bottom: 6px; font-size: 13px; letter-spacing: 0.1em; text-transform: uppercase; }
 
-  /* RESULT */
+  /* Friendly notice cards (shared style for quota + premium notices) */
+  .notice-card {
+    border: 1px solid var(--gold); background: rgba(138, 109, 46, 0.06);
+    padding: 28px 32px;
+  }
+  .notice-card .notice-eyebrow {
+    font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 10px;
+  }
+  .notice-card .notice-headline {
+    font-family: 'Cormorant Garamond', serif; font-size: 24px;
+    font-weight: 600; line-height: 1.3; margin-bottom: 10px;
+    color: var(--ink);
+  }
+  .notice-card .notice-headline .company-pill {
+    display: inline-block; font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; font-weight: 500; vertical-align: middle;
+    background: var(--paper); border: 1px solid var(--ink-3);
+    color: var(--ink-2); padding: 2px 8px; margin-left: 6px;
+  }
+  .notice-card .notice-body {
+    font-size: 14px; color: var(--ink-2); line-height: 1.65;
+  }
+  .notice-card .notice-body em {
+    font-style: italic; color: var(--accent); font-weight: 500;
+  }
+  .notice-suggestions {
+    display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px;
+  }
+  .notice-suggestions .suggest-btn {
+    font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 500;
+    background: var(--paper); border: 1px solid var(--ink-3); color: var(--ink-2);
+    padding: 6px 12px; cursor: pointer; transition: all 0.15s ease;
+  }
+  .notice-suggestions .suggest-btn:hover {
+    background: var(--ink); color: var(--paper); border-color: var(--ink);
+  }
+
   #result-section { display: none; }
   #result-section.show { display: block; }
 
@@ -328,7 +356,6 @@
   .crit-row-score.mid  { color: var(--amber); }
   .crit-row-score.bad  { color: var(--red); }
 
-  /* FOOTER */
   footer { padding: 48px 0 64px; text-align: center; color: var(--ink-3); font-size: 12px; letter-spacing: 0.05em; }
   footer .ornament { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: var(--accent); margin-bottom: 12px; }
   footer .disclaimer { font-style: italic; font-family: 'Cormorant Garamond', serif; font-size: 14px; max-width: 540px; margin: 12px auto 0; line-height: 1.55; }
@@ -394,7 +421,6 @@
       <p class="lede" style="margin: 0 auto;" data-i18n="ch2-lede"></p>
     </div>
 
-    <!-- ===== BUFFETT INDICATOR PANEL ===== -->
     <div class="indicator-panel">
       <div class="indicator-left">
         <div class="indicator-eyebrow" data-i18n="indicator-eyebrow"></div>
@@ -439,10 +465,37 @@
     <div id="state-loading" class="state-card" style="display: none;">
       <span class="spinner"></span><span data-i18n="loading"></span>
     </div>
+
+    <!-- Premium-blocked notice -->
+    <div id="state-premium" class="notice-card" style="display: none;">
+      <div class="notice-eyebrow" data-i18n="premium-eyebrow"></div>
+      <div class="notice-headline">
+        <span data-i18n="premium-headline"></span>
+        <span class="company-pill" id="premium-ticker-pill"></span>
+      </div>
+      <div class="notice-body" data-i18n="premium-body" data-html="1"></div>
+      <div class="notice-suggestions">
+        <button class="suggest-btn" data-ticker="AAPL">AAPL</button>
+        <button class="suggest-btn" data-ticker="MSFT">MSFT</button>
+        <button class="suggest-btn" data-ticker="NVDA">NVDA</button>
+        <button class="suggest-btn" data-ticker="KO">KO</button>
+        <button class="suggest-btn" data-ticker="JNJ">JNJ</button>
+      </div>
+    </div>
+
+    <!-- Daily-quota notice -->
+    <div id="state-quota" class="notice-card" style="display: none;">
+      <div class="notice-eyebrow" data-i18n="quota-eyebrow"></div>
+      <div class="notice-headline" data-i18n="quota-headline"></div>
+      <div class="notice-body" data-i18n="quota-body" data-html="1"></div>
+    </div>
+
+    <!-- Technical error fallback -->
     <div id="state-error" class="error-card" style="display: none;">
       <strong data-i18n="error-title"></strong>
       <span id="state-error-msg"></span>
     </div>
+
     <div id="state-empty" class="state-card" data-i18n="state-empty"></div>
 
     <div id="result-section">
@@ -494,7 +547,7 @@
 <footer class="container">
   <div class="ornament serif">❦</div>
   <div data-i18n="footer-title"></div>
-  <div style="margin-top: 6px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.15em;">v1.2 · LIVE DATA</div>
+  <div style="margin-top: 6px; font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.15em;">v1.5 · LIVE DATA</div>
   <p class="disclaimer" data-i18n="disclaimer"></p>
 </footer>
 
@@ -524,6 +577,12 @@ const i18n = {
     loading: '재무 데이터를 불러오는 중입니다...',
     'error-title': '오류',
     'state-empty': '종목을 선택하면 진단 결과가 여기에 나타납니다.',
+    'quota-eyebrow': '안내',
+    'quota-headline': '오늘의 분석 한도가 초과되었습니다.',
+    'quota-body': '이 사이트는 무료 데이터 한도 안에서 운영되며, <em>한국 시간 오후 1시경</em>에 다시 사용 가능합니다. 이미 분석된 종목(AAPL, NVDA, MSFT, KO, JNJ, WMT 등)은 정상 표시됩니다.',
+    'premium-eyebrow': '안내',
+    'premium-headline': '이 종목은 현재 분석할 수 없습니다',
+    'premium-body': '본 사이트는 무료 데이터 플랜으로 운영되며, <em>일부 S&P 500 종목</em>은 데이터 공급사의 정책상 분석이 제한됩니다. 회사 기본 정보는 받아왔지만 재무제표 5년치 데이터는 유료 플랜 전용이라 진단을 완료할 수 없었습니다. 아래 종목들은 정상 작동합니다:',
     'verdict-stamp': '— 최종 평가 —',
     'editor-stamp': '— 편집자 노트 —',
     'radar-title': '6대 기준 적합도',
@@ -575,6 +634,12 @@ const i18n = {
     loading: 'Fetching financial data...',
     'error-title': 'Error',
     'state-empty': 'Search or select a ticker above to see the diagnostic.',
+    'quota-eyebrow': 'Notice',
+    'quota-headline': "Today's analysis quota has been reached.",
+    'quota-body': 'This site runs within a free data tier and will be available again at <em>8 PM Eastern Time (7 PM EST in winter)</em>, when the daily quota resets at midnight UTC. Stocks already analyzed today (AAPL, NVDA, MSFT, KO, JNJ, WMT, and others) continue to display normally.',
+    'premium-eyebrow': 'Notice',
+    'premium-headline': "This ticker can't be analyzed right now",
+    'premium-body': "This site runs on a free data plan, and <em>some S&P 500 names</em> are restricted by the data provider's policy. We received the company profile, but the five years of financial statements needed for diagnosis are paid-tier only. The following tickers work normally:",
     'verdict-stamp': '— Official Verdict —',
     'editor-stamp': "— Editor's Note —",
     'radar-title': 'Fit Across the Six',
@@ -604,14 +669,12 @@ const i18n = {
   }
 };
 
-// ---------- STATE ----------
 let currentLang = 'ko';
 let radar;
 let sp500List = [];
 let activeIndex = -1;
 const cache = {};
 
-// ---------- I18N ----------
 function applyI18n() {
   const t = i18n[currentLang];
   document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -626,8 +689,7 @@ function applyI18n() {
   });
   document.documentElement.lang = currentLang;
 
-  const grid = document.getElementById('criteria-grid');
-  grid.innerHTML = t.criteria.map(c => `
+  document.getElementById('criteria-grid').innerHTML = t.criteria.map(c => `
     <div class="criterion">
       <div class="criterion-num">${c.num}</div>
       <div class="criterion-title">${c.title}</div>
@@ -641,7 +703,6 @@ function applyI18n() {
   if (radar) { radar.data.labels = t.radarLabels; radar.update(); }
 }
 
-// ---------- AUTOCOMPLETE ----------
 async function loadSP500() {
   try {
     const resp = await fetch('/sp500.json');
@@ -687,15 +748,21 @@ function renderDropdown(items) {
   });
 }
 
-// ---------- ANALYZE ----------
+function hideAllStates() {
+  document.getElementById('state-empty').style.display = 'none';
+  document.getElementById('state-error').style.display = 'none';
+  document.getElementById('state-quota').style.display = 'none';
+  document.getElementById('state-premium').style.display = 'none';
+  document.getElementById('state-loading').style.display = 'none';
+  document.getElementById('result-section').classList.remove('show');
+}
+
 async function analyzeTicker(ticker) {
   ticker = ticker.toUpperCase().trim();
   document.getElementById('search-input').value = ticker;
   document.getElementById('search-dropdown').classList.remove('show');
 
-  document.getElementById('state-empty').style.display = 'none';
-  document.getElementById('state-error').style.display = 'none';
-  document.getElementById('result-section').classList.remove('show');
+  hideAllStates();
   document.getElementById('state-loading').style.display = 'block';
 
   if (cache[ticker]) {
@@ -706,11 +773,29 @@ async function analyzeTicker(ticker) {
   try {
     const resp = await fetch(`/api/analyze?ticker=${encodeURIComponent(ticker)}`);
     const data = await resp.json();
+
+    if (data.errorCode === 'RATE_LIMIT') {
+      hideAllStates();
+      document.getElementById('state-quota').style.display = 'block';
+      return;
+    }
+
+    if (data.errorCode === 'PREMIUM_REQUIRED') {
+      hideAllStates();
+      const pill = document.getElementById('premium-ticker-pill');
+      pill.textContent = data.company
+        ? `${data.ticker} · ${data.company}`
+        : data.ticker;
+      document.getElementById('state-premium').style.display = 'block';
+      return;
+    }
+
     if (data.error) throw new Error(data.error);
+
     cache[ticker] = data;
     renderResult(data);
   } catch (e) {
-    document.getElementById('state-loading').style.display = 'none';
+    hideAllStates();
     document.getElementById('state-error').style.display = 'block';
     document.getElementById('state-error-msg').textContent = e.message;
   }
@@ -720,7 +805,7 @@ function scoreClass(s) { return s >= 70 ? 'good' : (s >= 50 ? 'mid' : 'bad'); }
 
 function renderResult(data) {
   const t = i18n[currentLang];
-  document.getElementById('state-loading').style.display = 'none';
+  hideAllStates();
   document.getElementById('result-section').classList.add('show');
 
   document.getElementById('v-ticker').textContent = `${data.exchange || ''} : ${data.ticker}`;
@@ -732,7 +817,6 @@ function renderResult(data) {
   pill.textContent = t.verdictLabels[cls];
   pill.className = 'verdict-pill ' + cls;
 
-  // Per-stock narrative from backend, with safe fallback
   const narrText = (data.narratives && data.narratives[currentLang])
     || (data.narratives && data.narratives.ko)
     || '';
@@ -763,7 +847,6 @@ function renderResult(data) {
   document.getElementById('result-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-// ---------- INIT CHART ----------
 const ctx = document.getElementById('radar').getContext('2d');
 radar = new Chart(ctx, {
   type: 'radar',
@@ -798,33 +881,24 @@ radar = new Chart(ctx, {
   }
 });
 
-// ---------- EVENTS ----------
 const input = document.getElementById('search-input');
 const dropdown = document.getElementById('search-dropdown');
 
-input.addEventListener('input', (e) => {
-  const items = searchTickers(e.target.value);
-  renderDropdown(items);
-});
-
+input.addEventListener('input', (e) => renderDropdown(searchTickers(e.target.value)));
 input.addEventListener('focus', (e) => {
-  if (e.target.value) {
-    const items = searchTickers(e.target.value);
-    renderDropdown(items);
-  }
+  if (e.target.value) renderDropdown(searchTickers(e.target.value));
 });
-
 input.addEventListener('keydown', (e) => {
   const items = dropdown.querySelectorAll('.search-item');
   if (e.key === 'ArrowDown') {
     e.preventDefault();
-    if (items.length === 0) return;
+    if (!items.length) return;
     activeIndex = (activeIndex + 1) % items.length;
     items.forEach((el, i) => el.classList.toggle('active', i === activeIndex));
     items[activeIndex].scrollIntoView({ block: 'nearest' });
   } else if (e.key === 'ArrowUp') {
     e.preventDefault();
-    if (items.length === 0) return;
+    if (!items.length) return;
     activeIndex = (activeIndex - 1 + items.length) % items.length;
     items.forEach((el, i) => el.classList.toggle('active', i === activeIndex));
     items[activeIndex].scrollIntoView({ block: 'nearest' });
@@ -841,12 +915,15 @@ input.addEventListener('keydown', (e) => {
 });
 
 document.addEventListener('click', (e) => {
-  if (!e.target.closest('.search-wrap')) {
-    dropdown.classList.remove('show');
-  }
+  if (!e.target.closest('.search-wrap')) dropdown.classList.remove('show');
 });
 
 document.querySelectorAll('.popular-btn').forEach(btn => {
+  btn.addEventListener('click', () => analyzeTicker(btn.dataset.ticker));
+});
+
+// Suggestion buttons inside the premium notice card
+document.querySelectorAll('.notice-suggestions .suggest-btn').forEach(btn => {
   btn.addEventListener('click', () => analyzeTicker(btn.dataset.ticker));
 });
 
@@ -864,7 +941,6 @@ document.querySelectorAll('.lang-toggle button').forEach(btn => {
   });
 });
 
-// ---------- INIT ----------
 try {
   const saved = localStorage.getItem('buffett-lang');
   if (saved === 'en' || saved === 'ko') {
