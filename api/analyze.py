@@ -331,11 +331,23 @@ class handler(BaseHTTPRequestHandler):
             result = analyze(ticker)
             self.wfile.write(json.dumps(result).encode("utf-8"))
         except urllib.error.HTTPError as e:
+            # FMP returns 402 for BOTH real quota exhaustion AND
+            # symbol-level premium restrictions. Distinguish by body text.
             if e.code == 402:
-                self.wfile.write(json.dumps({
-                    "errorCode": "RATE_LIMIT",
-                    "error": "Daily data quota reached.",
-                }).encode("utf-8"))
+                try:
+                    body = e.read().decode("utf-8", errors="ignore").lower()
+                except Exception:
+                    body = ""
+                if "premium" in body or "subscription" in body:
+                    self.wfile.write(json.dumps({
+                        "errorCode": "PREMIUM_REQUIRED",
+                        "ticker": ticker.upper().strip(),
+                    }).encode("utf-8"))
+                else:
+                    self.wfile.write(json.dumps({
+                        "errorCode": "RATE_LIMIT",
+                        "error": "Daily data quota reached.",
+                    }).encode("utf-8"))
             elif e.code == 403:
                 self.wfile.write(json.dumps({
                     "errorCode": "FORBIDDEN",
